@@ -5,6 +5,10 @@ interface Item {
   text: string;
 }
 
+interface AccordionProps {
+  data: Item[];
+}
+
 const faqs: Item[] = [
   {
     title: 'Where are these chairs assembled?',
@@ -28,25 +32,45 @@ function App(): JSX.Element {
   );
 }
 
-function Accordion({ data }: { data: Item[] }): JSX.Element {
+function Accordion({ data }: AccordionProps): JSX.Element {
+  const [currOpen, setCurrOpen] = useState<number | null>(null);
+
   return (
     <div className="accordion">
       {data.map<JSX.Element>((el, index) => (
-        <AccordionItem key={index} {...el} num={index} />
+        <AccordionItem
+          key={index}
+          title={el.title}
+          num={index}
+          currOpen={currOpen}
+          onOpen={setCurrOpen}
+        >
+          {el.text}
+        </AccordionItem>
       ))}
     </div>
   );
 }
 
+interface AccordionItemProps {
+  title: string;
+  num: number;
+  currOpen: number | null;
+  onOpen: (num: number | null) => void;
+  children: string;
+}
+
 function AccordionItem({
   num,
   title,
-  text,
-}: Item & { num: number }): JSX.Element {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  currOpen,
+  onOpen,
+  children,
+}: AccordionItemProps): JSX.Element {
+  const isOpen: boolean = currOpen === num;
 
   function handleToggle() {
-    setIsOpen((i: boolean): boolean => !i);
+    onOpen(isOpen ? null : num);
   }
 
   return (
@@ -55,7 +79,7 @@ function AccordionItem({
       <p className="title">{title}</p>
       <p className="icon">{isOpen ? '-' : '+'}</p>
 
-      {isOpen && <p className="content-box">{text}</p>}
+      {isOpen && <p className="content-box">{children}</p>}
     </div>
   );
 }
